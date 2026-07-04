@@ -1,0 +1,248 @@
+// app.js — orchestration: address -> geocode -> flood zone + claims -> gap -> explain
+
+const App = {
+    state: {
+        address: null,
+        zone: null,
+        subtype: null,
+        zoneInfo: null,
+        claims: null,
+        gap: null,
+        lang: "en",
+    },
+
+    init() {
+        MapView.init();
+        document.getElementById("search-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            this.search();
+        });
+        document.getElementById("calc-btn").addEventListener("click", () => this.calculate());
+        document.getElementById("lang-toggle").addEventListener("click", () => this.toggleLang());
+        this.setupInstall();
+    },
+
+    // "Install app" button: shows when the browser says the PWA is installable.
+    setupInstall() {
+        const btn = document.getElementById("install-btn");
+        let deferred = null;
+        window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferred = e;
+            btn.classList.remove("hidden");
+        });
+        btn.addEventListener("click", async () => {
+            if (!deferred) return;
+            deferred.prompt();
+            await deferred.userChoice;
+            deferred = null;
+            btn.classList.add("hidden");
+        });
+        window.addEventListener("appinstalled", () => btn.classList.add("hidden"));
+    },
+
+    setStatus(msg, isError = false) {
+        const el = document.getElementById("search-status");
+        el.textContent = msg;
+        el.classList.toggle("error", isError);
+    },
+
+    async search() {
+        const input = document.getElementById("address-input").value.trim();
+        const btn = document.getElementById("search-btn");
+        if (!input) return;
+
+        btn.disabled = true;
+        this.setStatus("Looking up address…");
+
+        try {
+            const loc = await Geocode.lookup(input);
+            this.state.address = loc;
+
+            document.getElementById("results").classList.remove("hidden");
+            MapView.showLocation(loc.lat, loc.lon, loc.matchedAddress);
+
+            this.setStatus("Checking FEMA flood maps…");
+            const [zoneRes, claimsRes] = await Promise.allSettled([
+                Fema.floodZone(loc.lat, loc.lon),
+                Fema.claimsByZip(loc.zip),
+            ]);
+
+            if (zoneRes.status === "fulfilled") {
+                this.state.zone = zoneRes.value.zone;
+                this.state.subtype = zoneRes.value.subtype;
+            } else {
+                this.state.zone = "UNKNOWN";
+                this.state.subtype = null;
+            }
+            this.state.zoneInfo = Fema.describeZone(this.state.zone, this.state.subtype);
+            this.renderZone();
+
+            if (claimsRes.status === "fulfilled") {
+                this.state.claims = claimsRes.value;
+                this.renderClaims();
+            }
+
+            this.setStatus("");
+            this.renderExplain();
+            this.tryAIExplain();
+        } catch (err) {
+            this.setStatus(err.message, true);
+        } finally {
+            btn.disabled = false;
+        }
+    },
+
+    renderZone() {
+        const card = document.getElementById("zone-card");
+        card.classList.remove("risk-high", "risk-moderate", "risk-low");
+        card.classList.add("risk-" + this.state.zoneInfo.level);
+        document.getElementById("zone-code").textContent =
+            this.state.zone === "UNKNOWN" ? "?" : "Zone " + this.state.zone;
+        document.getElementById("zone-desc").textContent = this.state.zoneInfo.text;
+    },
+
+    renderClaims() {
+        const { count, totalPaid } = this.state.claims;
+        document.getElementById("claims-count").textContent = count.toLocaleString("en-US");
+        document.getElementById("claims-desc").textContent =
+            count > 0
+                ? GapCalc.formatUSD(totalPaid) + " paid out in flood-insurance claims in ZIP " +
+                  (this.state.address.zip || "") + " since 1978. Flooding has happened here before."
+                : "No NFIP claims on record for this ZIP — but claims only count insured homes.";
+    },
+
+    calculate() {
+        if (!this.state.zone) return;
+        const homeValue = Number(document.getElementById("home-value").value) || 0;
+        const coverage = Number(document.getElementById("coverage").value) || 0;
+
+        const result = GapCalc.compute(homeValue, coverage, this.state.zone, this.state.subtype);
+        this.state.gap = { ...result, homeValue, coverage };
+
+        const box = document.getElementById("gap-result");
+        box.classList.remove("hidden");
+        box.classList.toggle("covered", result.gap === 0);
+        document.getElementById("gap-number").textContent = GapCalc.formatUSD(result.gap);
+        document.getElementById("gap-detail").textContent =
+            "Estimated damage: " + GapCalc.formatUSD(result.estimatedLoss) +
+            " (" + Math.round(result.ratio * 100) + "% of home value at ~" + result.depth +
+            " ft of water) minus " + GapCalc.formatUSD(coverage) + " coverage.";
+
+        this.renderExplain();
+        this.tryAIExplain();
+    },
+
+    toggleLang() {
+        this.state.lang = this.state.lang === "en" ? "es" : "en";
+        document.getElementById("lang-toggle").textContent =
+            this.state.lang === "en" ? "ES" : "EN";
+        this.renderExplain();
+        this.tryAIExplain();
+    },
+
+    // Try the AI backend; if it's not running, the template explanation stays.
+    async tryAIExplain() {
+        const s = this.state;
+        if (!s.zone) return;
+        const seq = ++this._aiSeq;
+        try {
+            const res = await fetch("/api/explain", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    lang: s.lang,
+                    zone: s.zone,
+                    subtype: s.subtype,
+                    riskLevel: s.zoneInfo?.level,
+                    zip: s.address?.zip,
+                    claimCount: s.claims?.count ?? null,
+                    claimsTotalPaid: s.claims?.totalPaid ?? null,
+                    homeValue: s.gap?.homeValue ?? null,
+                    coverage: s.gap?.coverage ?? null,
+                    estimatedLoss: s.gap?.estimatedLoss ?? null,
+                    gap: s.gap?.gap ?? null,
+                }),
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            // Ignore stale responses (user searched/toggled again mid-flight)
+            if (seq !== this._aiSeq || !data.explanation) return;
+            const el = document.getElementById("explain-text");
+            el.innerHTML = "";
+            for (const para of data.explanation.split(/\n+/)) {
+                if (!para.trim()) continue;
+                const p = document.createElement("p");
+                p.textContent = para.trim();
+                el.appendChild(p);
+            }
+            const badge = document.createElement("p");
+            badge.className = "ai-badge";
+            badge.textContent = this.state.lang === "es" ? "✦ Explicación generada por IA" : "✦ AI-generated explanation";
+            el.appendChild(badge);
+        } catch {
+            /* backend not running — template explanation stays */
+        }
+    },
+    _aiSeq: 0,
+
+    // Template-based explanation (always renders instantly; AI upgrades it when available).
+    renderExplain() {
+        const el = document.getElementById("explain-text");
+        const s = this.state;
+        if (!s.zone) return;
+
+        const zoneName = s.zone === "UNKNOWN" ? null : s.zone;
+        const claims = s.claims;
+        const gap = s.gap;
+
+        if (s.lang === "es") {
+            let html = "";
+            if (zoneName) {
+                html += "<p>Su dirección está en la <strong>zona " + zoneName + "</strong> según los mapas oficiales de FEMA. " +
+                    (s.zoneInfo.level === "high"
+                        ? "Es una zona de <strong>alto riesgo</strong>: al menos 1% de probabilidad de inundación cada año."
+                        : s.zoneInfo.level === "moderate"
+                        ? "Es una zona de riesgo moderado."
+                        : "Es una zona de menor riesgo en los mapas — pero 1 de cada 4 reclamos de inundación viene de zonas así.") + "</p>";
+            }
+            if (claims && claims.count > 0) {
+                html += "<p>En su código postal ha habido <strong>" + claims.count.toLocaleString("es") +
+                    " reclamos</strong> de seguro por inundación desde 1978.</p>";
+            }
+            if (gap) {
+                html += gap.gap > 0
+                    ? "<p>Si ocurriera una inundación típica para su zona, el daño estimado sería de <strong>" +
+                      GapCalc.formatUSD(gap.estimatedLoss) + "</strong> — y <strong>" + GapCalc.formatUSD(gap.gap) +
+                      "</strong> saldría de su bolsillo. El seguro de casa normal <strong>no</strong> cubre inundaciones; se necesita una póliza aparte (NFIP).</p>"
+                    : "<p>Con su cobertura actual, una inundación típica estaría <strong>cubierta</strong>. Bien hecho.</p>";
+            }
+            el.innerHTML = html || "<p>Busque una dirección para ver la explicación.</p>";
+            return;
+        }
+
+        let html = "";
+        if (zoneName) {
+            html += "<p>Your address sits in <strong>Zone " + zoneName + "</strong> on FEMA's official flood maps. " +
+                (s.zoneInfo.level === "high"
+                    ? "That's a <strong>high-risk</strong> zone: at least a 1-in-100 chance of flooding every single year — about a 26% chance over a 30-year mortgage."
+                    : s.zoneInfo.level === "moderate"
+                    ? "That's a moderate-risk zone — outside the required-insurance area, but well within where Harvey's damage reached."
+                    : "That's a lower-risk zone on the maps — but about 1 in 4 flood claims come from zones like this.") + "</p>";
+        }
+        if (claims && claims.count > 0) {
+            html += "<p>Your ZIP code has <strong>" + claims.count.toLocaleString("en-US") +
+                " flood-insurance claims</strong> on record since 1978. Flooding here is not hypothetical.</p>";
+        }
+        if (gap) {
+            html += gap.gap > 0
+                ? "<p>If a typical flood for your zone hit tomorrow, the estimated damage is <strong>" +
+                  GapCalc.formatUSD(gap.estimatedLoss) + "</strong> — and <strong>" + GapCalc.formatUSD(gap.gap) +
+                  "</strong> of that would come out of your pocket. Regular homeowners insurance does <strong>not</strong> cover floods; it takes a separate NFIP or private flood policy.</p>"
+                : "<p>With your current coverage, a typical flood for your zone would be <strong>fully covered</strong>. That puts you ahead of most of Houston.</p>";
+        }
+        el.innerHTML = html || "<p>Search an address to see your explanation.</p>";
+    },
+};
+
+document.addEventListener("DOMContentLoaded", () => App.init());

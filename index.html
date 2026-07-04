@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FloodGap — Know your flood risk, know your gap</title>
+    <meta name="description" content="Enter any Houston-area address to see your FEMA flood zone, local flood claim history, and the gap between flood damage costs and your insurance coverage." />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0b2545" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap header-row">
+            <div class="brand">
+                <span class="brand-mark">🌊</span>
+                <span class="brand-name">FloodGap</span>
+            </div>
+            <p class="tagline">Know your flood risk. Know your gap.</p>
+            <button id="install-btn" class="install-btn hidden" type="button">⬇ Install app</button>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <!-- Search -->
+        <section class="search-section" aria-label="Address search">
+            <h1>What would a flood cost <em>your</em> home?</h1>
+            <p class="sub">
+                Most Houston homes flooded by Harvey had no flood insurance.
+                Enter an address to see your official FEMA flood zone, your neighborhood's
+                real claim history, and your coverage gap.
+            </p>
+            <form id="search-form" class="search-bar" autocomplete="street-address">
+                <input
+                    id="address-input"
+                    type="text"
+                    placeholder="e.g. 901 Bagby St, Houston, TX 77002"
+                    aria-label="Street address"
+                    required
+                />
+                <button type="submit" id="search-btn">Check my risk</button>
+            </form>
+            <p id="search-status" class="status" role="status"></p>
+        </section>
+
+        <!-- Results -->
+        <section id="results" class="results hidden" aria-label="Flood risk results">
+            <div class="results-grid">
+                <!-- Map -->
+                <div class="card map-card">
+                    <div id="map" aria-label="Map of searched address"></div>
+                </div>
+
+                <!-- Flood zone -->
+                <div class="card" id="zone-card">
+                    <h2>FEMA flood zone</h2>
+                    <p class="big-stat" id="zone-code">—</p>
+                    <p id="zone-desc" class="detail">Look up an address to see its zone.</p>
+                </div>
+
+                <!-- Claims history -->
+                <div class="card" id="claims-card">
+                    <h2>Flood claims in this ZIP</h2>
+                    <p class="big-stat" id="claims-count">—</p>
+                    <p id="claims-desc" class="detail">Historical NFIP flood-insurance claims.</p>
+                </div>
+
+                <!-- Gap calculator -->
+                <div class="card gap-card" id="gap-card">
+                    <h2>Your coverage gap</h2>
+                    <div class="gap-inputs">
+                        <label>
+                            Home value ($)
+                            <input type="number" id="home-value" value="300000" min="10000" step="10000" />
+                        </label>
+                        <label>
+                            Flood insurance coverage ($)
+                            <input type="number" id="coverage" value="0" min="0" step="10000" />
+                        </label>
+                        <button id="calc-btn" type="button">Calculate my gap</button>
+                    </div>
+                    <div class="gap-result hidden" id="gap-result">
+                        <p class="gap-label">Estimated uncovered loss in a typical flood for your zone:</p>
+                        <p class="gap-number" id="gap-number">$0</p>
+                        <p class="detail" id="gap-detail"></p>
+                    </div>
+                </div>
+
+                <!-- Plain-English explanation -->
+                <div class="card explain-card" id="explain-card">
+                    <div class="explain-head">
+                        <h2>What does this mean?</h2>
+                        <button id="lang-toggle" type="button" title="Ver en español">ES</button>
+                    </div>
+                    <div id="explain-text" class="explain-text">
+                        <p>Search an address and calculate your gap — then this panel explains
+                        everything in plain language.</p>
+                    </div>
+                </div>
+
+                <!-- Action list -->
+                <div class="card" id="actions-card">
+                    <h2>What you can do</h2>
+                    <ul class="actions">
+                        <li><a href="https://www.floodsmart.gov/flood-insurance-cost" target="_blank" rel="noopener">Get an NFIP flood insurance estimate →</a></li>
+                        <li><a href="https://msc.fema.gov/portal/home" target="_blank" rel="noopener">See your official FEMA flood map →</a></li>
+                        <li><a href="https://www.ready.gov/floods" target="_blank" rel="noopener">Flood preparedness checklist →</a></li>
+                        <li><a href="https://www.houstonrecovers.org/" target="_blank" rel="noopener">Houston flood recovery resources →</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>
+                FloodGap is an educational tool, not insurance or financial advice.
+                Flood zones from FEMA's National Flood Hazard Layer; claims from OpenFEMA;
+                loss estimates use simplified FEMA depth-damage ratios.
+            </p>
+            <p>Built by Julian Quevedo · Houston, TX</p>
+        </div>
+    </footer>
+
+    <script>
+        // PWA: register service worker (makes the site installable as an app)
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js").catch(() => {});
+        }
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/geocode.js"></script>
+    <script src="js/fema.js"></script>
+    <script src="js/gapcalc.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
