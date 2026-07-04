@@ -1,7 +1,7 @@
 // sw.js — service worker: caches the app shell so FloodGap installs and
 // opens instantly like a native app. API calls always go to the network.
 
-const CACHE = "floodgap-v2";
+const CACHE = "floodgap-v4";
 const SHELL = [
     ".",
     "index.html",
@@ -35,8 +35,9 @@ self.addEventListener("fetch", (e) => {
     // Never cache API/data requests — always live government data.
     if (url.origin !== location.origin) return;
     // Network-first: fresh code when online, cached shell when offline.
+    // cache:"no-cache" forces revalidation so the browser HTTP cache can't serve stale JS.
     e.respondWith(
-        fetch(e.request)
+        fetch(e.request, { cache: "no-cache" })
             .then((res) => {
                 const copy = res.clone();
                 caches.open(CACHE).then((c) => c.put(e.request, copy));

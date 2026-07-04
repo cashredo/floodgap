@@ -19,7 +19,30 @@ const App = {
         });
         document.getElementById("calc-btn").addEventListener("click", () => this.calculate());
         document.getElementById("lang-toggle").addEventListener("click", () => this.toggleLang());
+        document.querySelectorAll(".chip").forEach((chip) =>
+            chip.addEventListener("click", () => {
+                document.getElementById("address-input").value = chip.dataset.addr;
+                this.search();
+            })
+        );
+        this.setupTheme();
         this.setupInstall();
+    },
+
+    setupTheme() {
+        const btn = document.getElementById("theme-toggle");
+        const icon = () => {
+            btn.textContent =
+                document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+        };
+        btn.addEventListener("click", () => {
+            const dark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (dark) document.documentElement.removeAttribute("data-theme");
+            else document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("floodgap-theme", dark ? "light" : "dark");
+            icon();
+        });
+        icon();
     },
 
     // "Install app" button: shows when the browser says the PWA is installable.
@@ -104,18 +127,32 @@ const App = {
 
     renderClaims() {
         const { count, totalPaid } = this.state.claims;
+        const zip = this.state.address.zip || "";
         document.getElementById("claims-count").textContent = count.toLocaleString("en-US");
-        document.getElementById("claims-desc").textContent =
-            count > 0
-                ? GapCalc.formatUSD(totalPaid) + " paid out in flood-insurance claims in ZIP " +
-                  (this.state.address.zip || "") + " since 1978. Flooding has happened here before."
-                : "No NFIP claims on record for this ZIP — but claims only count insured homes.";
+        let desc;
+        if (count === 0) {
+            desc = "No NFIP claims on record for this ZIP. Keep in mind claims only count homes that had insurance.";
+        } else if (totalPaid === null) {
+            desc = "Flood-insurance claims paid in ZIP " + zip + " since 1978. Flooding has happened here before.";
+        } else {
+            desc = GapCalc.formatUSD(totalPaid) + " paid out in flood-insurance claims in ZIP " +
+                zip + " since 1978. Flooding has happened here before.";
+        }
+        document.getElementById("claims-desc").textContent = desc;
     },
 
     calculate() {
-        if (!this.state.zone) return;
-        const homeValue = Number(document.getElementById("home-value").value) || 0;
-        const coverage = Number(document.getElementById("coverage").value) || 0;
+        if (!this.state.zone) {
+            this.setStatus("Search an address first, then calculate your gap.", true);
+            return;
+        }
+        const homeValue = Math.max(0, Number(document.getElementById("home-value").value) || 0);
+        const coverage = Math.max(0, Number(document.getElementById("coverage").value) || 0);
+        if (homeValue < 1000) {
+            this.setStatus("Enter a realistic home value to calculate your gap.", true);
+            return;
+        }
+        this.setStatus("");
 
         const result = GapCalc.compute(homeValue, coverage, this.state.zone, this.state.subtype);
         this.state.gap = { ...result, homeValue, coverage };
@@ -178,7 +215,7 @@ const App = {
             }
             const badge = document.createElement("p");
             badge.className = "ai-badge";
-            badge.textContent = this.state.lang === "es" ? "✦ Explicación generada por IA" : "✦ AI-generated explanation";
+            badge.textContent = this.state.lang === "es" ? "Explicado con un poco de ayuda de IA" : "Explained with a little help from AI";
             el.appendChild(badge);
         } catch {
             /* backend not running — template explanation stays */
@@ -204,7 +241,7 @@ const App = {
                         ? "Es una zona de <strong>alto riesgo</strong>: al menos 1% de probabilidad de inundación cada año."
                         : s.zoneInfo.level === "moderate"
                         ? "Es una zona de riesgo moderado."
-                        : "Es una zona de menor riesgo en los mapas — pero 1 de cada 4 reclamos de inundación viene de zonas así.") + "</p>";
+                        : "Es una zona de menor riesgo en los mapas, pero 1 de cada 4 reclamos de inundación viene de zonas así.") + "</p>";
             }
             if (claims && claims.count > 0) {
                 html += "<p>En su código postal ha habido <strong>" + claims.count.toLocaleString("es") +
@@ -213,7 +250,7 @@ const App = {
             if (gap) {
                 html += gap.gap > 0
                     ? "<p>Si ocurriera una inundación típica para su zona, el daño estimado sería de <strong>" +
-                      GapCalc.formatUSD(gap.estimatedLoss) + "</strong> — y <strong>" + GapCalc.formatUSD(gap.gap) +
+                      GapCalc.formatUSD(gap.estimatedLoss) + "</strong>, y <strong>" + GapCalc.formatUSD(gap.gap) +
                       "</strong> saldría de su bolsillo. El seguro de casa normal <strong>no</strong> cubre inundaciones; se necesita una póliza aparte (NFIP).</p>"
                     : "<p>Con su cobertura actual, una inundación típica estaría <strong>cubierta</strong>. Bien hecho.</p>";
             }
@@ -225,10 +262,10 @@ const App = {
         if (zoneName) {
             html += "<p>Your address sits in <strong>Zone " + zoneName + "</strong> on FEMA's official flood maps. " +
                 (s.zoneInfo.level === "high"
-                    ? "That's a <strong>high-risk</strong> zone: at least a 1-in-100 chance of flooding every single year — about a 26% chance over a 30-year mortgage."
+                    ? "That's a <strong>high-risk</strong> zone: at least a 1-in-100 chance of flooding every single year, which adds up to about a 26% chance over a 30-year mortgage."
                     : s.zoneInfo.level === "moderate"
-                    ? "That's a moderate-risk zone — outside the required-insurance area, but well within where Harvey's damage reached."
-                    : "That's a lower-risk zone on the maps — but about 1 in 4 flood claims come from zones like this.") + "</p>";
+                    ? "That's a moderate-risk zone. It sits outside the required-insurance area, but well within where Harvey's damage reached."
+                    : "That's a lower-risk zone on the maps, but about 1 in 4 flood claims come from zones like this.") + "</p>";
         }
         if (claims && claims.count > 0) {
             html += "<p>Your ZIP code has <strong>" + claims.count.toLocaleString("en-US") +
@@ -237,7 +274,7 @@ const App = {
         if (gap) {
             html += gap.gap > 0
                 ? "<p>If a typical flood for your zone hit tomorrow, the estimated damage is <strong>" +
-                  GapCalc.formatUSD(gap.estimatedLoss) + "</strong> — and <strong>" + GapCalc.formatUSD(gap.gap) +
+                  GapCalc.formatUSD(gap.estimatedLoss) + "</strong>, and <strong>" + GapCalc.formatUSD(gap.gap) +
                   "</strong> of that would come out of your pocket. Regular homeowners insurance does <strong>not</strong> cover floods; it takes a separate NFIP or private flood policy.</p>"
                 : "<p>With your current coverage, a typical flood for your zone would be <strong>fully covered</strong>. That puts you ahead of most of Houston.</p>";
         }

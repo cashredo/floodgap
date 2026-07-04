@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FloodGap — Know your flood risk, know your gap</title>
+    <title>FloodGap | Know your flood risk, know your gap</title>
     <meta name="description" content="Enter any Houston-area address to see your FEMA flood zone, local flood claim history, and the gap between flood damage costs and your insurance coverage." />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#0b2545" />
@@ -13,6 +13,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+        // Apply saved theme before first paint to avoid a flash
+        (function () {
+            var saved = localStorage.getItem("floodgap-theme");
+            var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (dark) document.documentElement.setAttribute("data-theme", "dark");
+        })();
+    </script>
 </head>
 <body>
     <header class="site-header">
@@ -22,7 +30,10 @@
                 <span class="brand-name">FloodGap</span>
             </div>
             <p class="tagline">Know your flood risk. Know your gap.</p>
-            <button id="install-btn" class="install-btn hidden" type="button">⬇ Install app</button>
+            <div class="header-actions">
+                <button id="theme-toggle" class="theme-btn" type="button" title="Switch light/dark">🌙</button>
+                <button id="install-btn" class="install-btn hidden" type="button">⬇ Install app</button>
+            </div>
         </div>
     </header>
 
@@ -46,6 +57,21 @@
                 <button type="submit" id="search-btn">Check my risk</button>
             </form>
             <p id="search-status" class="status" role="status"></p>
+            <div class="examples">
+                <span class="examples-label">Try a neighborhood:</span>
+                <button class="chip" type="button" data-addr="901 Bagby St, Houston, TX 77002">Downtown</button>
+                <button class="chip" type="button" data-addr="5100 Braesheather Dr, Houston, TX 77096">Meyerland</button>
+                <button class="chip" type="button" data-addr="4522 Kingwood Dr, Kingwood, TX 77345">Kingwood</button>
+            </div>
+            <details class="how">
+                <summary>How does this work?</summary>
+                <p>
+                    We check your address against FEMA's official flood maps, count the real
+                    flood insurance claims paid in your ZIP code since 1978, and estimate what
+                    a typical flood would cost based on how deep the water usually gets in your
+                    zone. Public data, simple math, no account needed. Nothing you type is saved.
+                </p>
+            </details>
         </section>
 
         <!-- Results -->
@@ -98,7 +124,7 @@
                         <button id="lang-toggle" type="button" title="Ver en español">ES</button>
                     </div>
                     <div id="explain-text" class="explain-text">
-                        <p>Search an address and calculate your gap — then this panel explains
+                        <p>Search an address and calculate your gap. This panel then explains
                         everything in plain language.</p>
                     </div>
                 </div>
