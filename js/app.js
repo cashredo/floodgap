@@ -27,13 +27,34 @@ const App = {
         );
         this.setupTheme();
         this.setupInstall();
+        this.setupTips();
+        // Render all data-lucide placeholders as inline SVG icons
+        if (window.lucide) lucide.createIcons();
+    },
+
+    // Tooltips open on tap too, since phones can't hover
+    setupTips() {
+        document.querySelectorAll(".tip").forEach((tip) =>
+            tip.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const wasOpen = tip.classList.contains("open");
+                document.querySelectorAll(".tip.open").forEach((t) => t.classList.remove("open"));
+                if (!wasOpen) tip.classList.add("open");
+            })
+        );
+        document.addEventListener("click", () =>
+            document.querySelectorAll(".tip.open").forEach((t) => t.classList.remove("open"))
+        );
     },
 
     setupTheme() {
         const btn = document.getElementById("theme-toggle");
+        // Moon shows in light mode, sun in dark. Lucide swaps <i> for <svg>
+        // but keeps the class, so these selectors survive icon rendering.
         const icon = () => {
-            btn.textContent =
-                document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+            const dark = document.documentElement.getAttribute("data-theme") === "dark";
+            btn.querySelector(".icon-moon")?.classList.toggle("hidden", dark);
+            btn.querySelector(".icon-sun")?.classList.toggle("hidden", !dark);
         };
         btn.addEventListener("click", () => {
             const dark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -64,10 +85,18 @@ const App = {
         window.addEventListener("appinstalled", () => btn.classList.add("hidden"));
     },
 
-    setStatus(msg, isError = false) {
+    setStatus(msg, isError = false, isLoading = false) {
         const el = document.getElementById("search-status");
         el.textContent = msg;
         el.classList.toggle("error", isError);
+        el.classList.toggle("loading", isLoading);
+    },
+
+    // Skeleton shimmer on the stat cards while data loads
+    setSkeletons(on) {
+        for (const id of ["zone-code", "zone-desc", "claims-count", "claims-desc"]) {
+            document.getElementById(id).classList.toggle("skeleton", on);
+        }
     },
 
     async search() {
@@ -76,16 +105,19 @@ const App = {
         if (!input) return;
 
         btn.disabled = true;
-        this.setStatus("Looking up address…");
+        const btnLabel = btn.textContent;
+        btn.textContent = "Checking…";
+        this.setStatus("Looking up that address…", false, true);
 
         try {
             const loc = await Geocode.lookup(input);
             this.state.address = loc;
 
             document.getElementById("results").classList.remove("hidden");
+            this.setSkeletons(true);
             MapView.showLocation(loc.lat, loc.lon, loc.matchedAddress);
 
-            this.setStatus("Checking FEMA flood maps…");
+            this.setStatus("Checking FEMA's flood maps…", false, true);
             const [zoneRes, claimsRes] = await Promise.allSettled([
                 Fema.floodZone(loc.lat, loc.lon),
                 Fema.claimsByZip(loc.zip),
@@ -94,16 +126,25 @@ const App = {
             if (zoneRes.status === "fulfilled") {
                 this.state.zone = zoneRes.value.zone;
                 this.state.subtype = zoneRes.value.subtype;
+                this.state.zoneInfo = Fema.describeZone(this.state.zone, this.state.subtype);
             } else {
+                // Service failure is different from "no zone at this point"
                 this.state.zone = "UNKNOWN";
                 this.state.subtype = null;
+                this.state.zoneInfo = {
+                    level: "moderate",
+                    text: "FEMA's flood map service didn't answer just now. It happens. Give it a minute and search again.",
+                };
             }
-            this.state.zoneInfo = Fema.describeZone(this.state.zone, this.state.subtype);
             this.renderZone();
 
             if (claimsRes.status === "fulfilled") {
                 this.state.claims = claimsRes.value;
                 this.renderClaims();
+            } else {
+                document.getElementById("claims-count").textContent = "?";
+                document.getElementById("claims-desc").textContent =
+                    "FEMA's claims records didn't answer just now. Try again in a minute.";
             }
 
             this.setStatus("");
@@ -112,7 +153,9 @@ const App = {
         } catch (err) {
             this.setStatus(err.message, true);
         } finally {
+            this.setSkeletons(false);
             btn.disabled = false;
+            btn.textContent = btnLabel;
         }
     },
 
@@ -215,8 +258,14 @@ const App = {
             }
             const badge = document.createElement("p");
             badge.className = "ai-badge";
-            badge.textContent = this.state.lang === "es" ? "Explicado con un poco de ayuda de IA" : "Explained with a little help from AI";
+            const spark = document.createElement("i");
+            spark.setAttribute("data-lucide", "sparkles");
+            badge.appendChild(spark);
+            badge.appendChild(document.createTextNode(
+                this.state.lang === "es" ? " Explicado con un poco de ayuda de IA" : " Explained with a little help from AI"
+            ));
             el.appendChild(badge);
+            if (window.lucide) lucide.createIcons();
         } catch {
             /* backend not running — template explanation stays */
         }

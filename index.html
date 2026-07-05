@@ -26,13 +26,19 @@
     <header class="site-header">
         <div class="wrap header-row">
             <div class="brand">
-                <span class="brand-mark">🌊</span>
+                <i data-lucide="waves" class="brand-mark"></i>
                 <span class="brand-name">FloodGap</span>
             </div>
             <p class="tagline">Know your flood risk. Know your gap.</p>
             <div class="header-actions">
-                <button id="theme-toggle" class="theme-btn" type="button" title="Switch light/dark">🌙</button>
-                <button id="install-btn" class="install-btn hidden" type="button">⬇ Install app</button>
+                <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark mode">
+                    <i data-lucide="moon" class="icon-moon"></i>
+                    <i data-lucide="sun" class="icon-sun hidden"></i>
+                </button>
+                <button id="install-btn" class="install-btn hidden" type="button">
+                    <i data-lucide="download"></i>
+                    Install app
+                </button>
             </div>
         </div>
     </header>
@@ -84,21 +90,42 @@
 
                 <!-- Flood zone -->
                 <div class="card" id="zone-card">
-                    <h2>FEMA flood zone</h2>
+                    <h2>
+                        <i data-lucide="map-pin"></i>
+                        Your flood zone
+                        <button class="tip" type="button" aria-label="What is a flood zone?"
+                            data-tip="FEMA divides every neighborhood into zones by how likely they are to flood. Zone A and AE mean high risk. Zone X means lower risk on paper.">
+                            <i data-lucide="info"></i>
+                        </button>
+                    </h2>
                     <p class="big-stat" id="zone-code">—</p>
                     <p id="zone-desc" class="detail">Look up an address to see its zone.</p>
                 </div>
 
                 <!-- Claims history -->
                 <div class="card" id="claims-card">
-                    <h2>Flood claims in this ZIP</h2>
+                    <h2>
+                        <i data-lucide="droplets"></i>
+                        Has it flooded here before?
+                        <button class="tip" type="button" aria-label="What counts as a claim?"
+                            data-tip="Every payout from the National Flood Insurance Program in this ZIP since 1978. Only insured homes show up here, so the real flood count is higher.">
+                            <i data-lucide="info"></i>
+                        </button>
+                    </h2>
                     <p class="big-stat" id="claims-count">—</p>
-                    <p id="claims-desc" class="detail">Historical NFIP flood-insurance claims.</p>
+                    <p id="claims-desc" class="detail">Real flood-insurance payouts, straight from FEMA's records.</p>
                 </div>
 
                 <!-- Gap calculator -->
                 <div class="card gap-card" id="gap-card">
-                    <h2>Your coverage gap</h2>
+                    <h2>
+                        <i data-lucide="wallet"></i>
+                        Your coverage gap
+                        <button class="tip" type="button" aria-label="What is a coverage gap?"
+                            data-tip="The part of the repair bill your insurance would not pay. Regular homeowners insurance never covers floods, so without a separate flood policy the gap is the whole bill.">
+                            <i data-lucide="info"></i>
+                        </button>
+                    </h2>
                     <div class="gap-inputs">
                         <label>
                             Home value ($)
@@ -120,8 +147,11 @@
                 <!-- Plain-English explanation -->
                 <div class="card explain-card" id="explain-card">
                     <div class="explain-head">
-                        <h2>What does this mean?</h2>
-                        <button id="lang-toggle" type="button" title="Ver en español">ES</button>
+                        <h2>
+                            <i data-lucide="lightbulb"></i>
+                            So what does all this mean?
+                        </h2>
+                        <button id="lang-toggle" type="button" title="Ver en español" aria-label="Switch language between English and Spanish">ES</button>
                     </div>
                     <div id="explain-text" class="explain-text">
                         <p>Search an address and calculate your gap. This panel then explains
@@ -131,12 +161,15 @@
 
                 <!-- Action list -->
                 <div class="card" id="actions-card">
-                    <h2>What you can do</h2>
+                    <h2>
+                        <i data-lucide="list-checks"></i>
+                        What to do next
+                    </h2>
                     <ul class="actions">
-                        <li><a href="https://www.floodsmart.gov/flood-insurance-cost" target="_blank" rel="noopener">Get an NFIP flood insurance estimate →</a></li>
-                        <li><a href="https://msc.fema.gov/portal/home" target="_blank" rel="noopener">See your official FEMA flood map →</a></li>
-                        <li><a href="https://www.ready.gov/floods" target="_blank" rel="noopener">Flood preparedness checklist →</a></li>
-                        <li><a href="https://www.houstonrecovers.org/" target="_blank" rel="noopener">Houston flood recovery resources →</a></li>
+                        <li><a href="https://www.floodsmart.gov/flood-insurance-cost" target="_blank" rel="noopener">Price a flood policy <i data-lucide="arrow-up-right"></i></a></li>
+                        <li><a href="https://msc.fema.gov/portal/home" target="_blank" rel="noopener">See your official FEMA map <i data-lucide="arrow-up-right"></i></a></li>
+                        <li><a href="https://www.ready.gov/floods" target="_blank" rel="noopener">Get your family flood-ready <i data-lucide="arrow-up-right"></i></a></li>
+                        <li><a href="https://www.houstonrecovers.org/" target="_blank" rel="noopener">Houston recovery resources <i data-lucide="arrow-up-right"></i></a></li>
                     </ul>
                 </div>
             </div>
@@ -161,6 +194,7 @@
         }
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@0.542.0/dist/umd/lucide.min.js"></script>
     <script src="js/geocode.js"></script>
     <script src="js/fema.js"></script>
     <script src="js/gapcalc.js"></script>
