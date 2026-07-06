@@ -25,10 +25,10 @@
 <body>
     <header class="site-header">
         <div class="wrap header-row">
-            <div class="brand">
+            <a class="brand brand-link" href="about.html" title="About FloodGap">
                 <i data-lucide="waves" class="brand-mark"></i>
                 <span class="brand-name">FloodGap</span>
-            </div>
+            </a>
             <p class="tagline">Know your flood risk. Know your gap.</p>
             <div class="header-actions">
                 <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark mode">
@@ -65,9 +65,20 @@
             <p id="search-status" class="status" role="status"></p>
             <div class="examples">
                 <span class="examples-label">Try a neighborhood:</span>
-                <button class="chip" type="button" data-addr="901 Bagby St, Houston, TX 77002">Downtown</button>
-                <button class="chip" type="button" data-addr="5100 Braesheather Dr, Houston, TX 77096">Meyerland</button>
-                <button class="chip" type="button" data-addr="4522 Kingwood Dr, Kingwood, TX 77345">Kingwood</button>
+                <div class="chip-scroll" role="list" aria-label="Example Houston neighborhoods">
+                    <button class="chip" type="button" data-addr="901 Bagby St, Houston, TX 77002">Downtown</button>
+                    <button class="chip" type="button" data-addr="5100 Braesheather Dr, Houston, TX 77096">Meyerland</button>
+                    <button class="chip" type="button" data-addr="4522 Kingwood Dr, Kingwood, TX 77345">Kingwood</button>
+                    <button class="chip" type="button" data-addr="1801 Heights Blvd, Houston, TX 77008">The Heights</button>
+                    <button class="chip" type="button" data-addr="5111 Bellaire Blvd, Bellaire, TX 77401">Bellaire</button>
+                    <button class="chip" type="button" data-addr="12850 Memorial Dr, Houston, TX 77024">Memorial</button>
+                    <button class="chip" type="button" data-addr="2101 NASA Pkwy, Houston, TX 77058">Clear Lake</button>
+                    <button class="chip" type="button" data-addr="6900 Harrisburg Blvd, Houston, TX 77011">East End</button>
+                    <button class="chip" type="button" data-addr="3100 Cleburne St, Houston, TX 77004">Third Ward</button>
+                    <button class="chip" type="button" data-addr="12300 North Fwy, Houston, TX 77060">Greenspoint</button>
+                    <button class="chip" type="button" data-addr="2700 Town Center Blvd N, Sugar Land, TX 77479">Sugar Land</button>
+                    <button class="chip" type="button" data-addr="23501 Cinco Ranch Blvd, Katy, TX 77494">Katy</button>
+                </div>
             </div>
             <details class="how">
                 <summary>How does this work?</summary>
@@ -183,7 +194,7 @@
                 Flood zones from FEMA's National Flood Hazard Layer; claims from OpenFEMA;
                 loss estimates use simplified FEMA depth-damage ratios.
             </p>
-            <p>Built by Julian Quevedo · Houston, TX</p>
+            <p>Built by Julian Quevedo · Houston, TX · <a href="about.html">About FloodGap &amp; privacy</a></p>
         </div>
     </footer>
 

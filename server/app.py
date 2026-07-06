@@ -1,13 +1,15 @@
 """FloodGap backend — serves the site + the AI explain endpoint.
 
 Run from the floodgap folder:
-    pip install flask anthropic
-    set ANTHROPIC_API_KEY=sk-ant-...   (PowerShell: $env:ANTHROPIC_API_KEY="sk-ant-...")
+    pip install flask requests
+    set GEMINI_API_KEY=...   (PowerShell: $env:GEMINI_API_KEY="...")
     python server/app.py
 
 Then open http://localhost:8000
-Without an API key the site still works — the explain panel just stays
-template-based instead of AI-generated.
+
+The AI explainer uses Google's Gemini free tier (aistudio.google.com — free
+API key, no card). Without a key the site still works fully; the explain
+panel uses the built-in template explanations instead.
 """
 
 import os
@@ -15,17 +17,20 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+try:
+    import requests as http
+except ImportError:
+    http = None
+
 ROOT = Path(__file__).resolve().parent.parent  # the floodgap/ folder
 
 app = Flask(__name__, static_folder=None)
 
-try:
-    import anthropic
-
-    _client = anthropic.Anthropic() if os.environ.get("ANTHROPIC_API_KEY") else None
-except ImportError:
-    _client = None
-
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-2.0-flash:generateContent"
+)
 
 SYSTEM_PROMPT = (
     "You are FloodGap's explainer. You receive flood-risk data for one home in the "
@@ -40,14 +45,7 @@ SYSTEM_PROMPT = (
 )
 
 
-@app.post("/api/explain")
-def explain():
-    if _client is None:
-        return jsonify({"error": "AI backend not configured"}), 503
-
-    data = request.get_json(silent=True) or {}
-    lang = "Spanish" if data.get("lang") == "es" else "English"
-
+def _facts_from(data):
     facts = []
     if data.get("zone"):
         facts.append(f"FEMA flood zone: {data['zone']} (risk level: {data.get('riskLevel')})")
@@ -56,24 +54,49 @@ def explain():
     if data.get("claimCount") is not None:
         facts.append(
             f"NFIP flood-insurance claims in this ZIP since 1978: {data['claimCount']}, "
-            f"total paid: ${data.get('claimsTotalPaid', 0):,.0f}"
+            f"total paid: ${data.get('claimsTotalPaid') or 0:,.0f}"
         )
     if data.get("homeValue"):
         facts.append(f"Home value: ${data['homeValue']:,}")
         facts.append(f"Flood insurance coverage: ${data.get('coverage', 0):,}")
         facts.append(f"Estimated damage in a typical flood for this zone: ${data.get('estimatedLoss', 0):,}")
         facts.append(f"Uncovered gap: ${data.get('gap', 0):,}")
+    return facts
 
+
+@app.post("/api/explain")
+def explain():
+    if not GEMINI_KEY or http is None:
+        return jsonify({"error": "AI backend not configured"}), 503
+
+    data = request.get_json(silent=True) or {}
+    lang = "Spanish" if data.get("lang") == "es" else "English"
+
+    facts = _facts_from(data)
     if not facts:
         return jsonify({"error": "no data"}), 400
 
-    msg = _client.messages.create(
-        model="claude-sonnet-5",
-        max_tokens=500,
-        system=SYSTEM_PROMPT.format(lang=lang),
-        messages=[{"role": "user", "content": "\n".join(facts)}],
-    )
-    return jsonify({"explanation": msg.content[0].text})
+    try:
+        res = http.post(
+            GEMINI_URL,
+            params={"key": GEMINI_KEY},
+            json={
+                "system_instruction": {
+                    "parts": [{"text": SYSTEM_PROMPT.format(lang=lang)}]
+                },
+                "contents": [{"role": "user", "parts": [{"text": "\n".join(facts)}]}],
+                "generationConfig": {"maxOutputTokens": 500, "temperature": 0.6},
+            },
+            timeout=20,
+        )
+        res.raise_for_status()
+        body = res.json()
+        text = body["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception:
+        # Any upstream hiccup: let the frontend keep its template explanation
+        return jsonify({"error": "AI request failed"}), 502
+
+    return jsonify({"explanation": text})
 
 
 # Serve the static site so one command runs everything.
@@ -89,7 +112,7 @@ def static_files(path):
 
 if __name__ == "__main__":
     print("FloodGap running at http://localhost:8000")
-    if _client is None:
-        print("NOTE: no ANTHROPIC_API_KEY set (or anthropic not installed) — "
-              "AI explain disabled, template explanations will be used.")
+    if not GEMINI_KEY:
+        print("NOTE: no GEMINI_API_KEY set — AI explain disabled, "
+              "built-in template explanations will be used.")
     app.run(host="127.0.0.1", port=8000, debug=False)

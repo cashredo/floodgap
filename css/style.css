@@ -64,9 +64,9 @@ body {
 }
 
 .wrap {
-    max-width: 1060px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
 }
 
 .hidden { display: none !important; }
@@ -92,6 +92,12 @@ body {
     font-size: 22px;
     letter-spacing: -0.02em;
 }
+.brand-link {
+    color: inherit;
+    text-decoration: none;
+    border-radius: 8px;
+}
+.brand-link:hover .brand-name { text-decoration: underline; text-underline-offset: 4px; }
 .tagline {
     margin: 0;
     color: #b9c8dd;
@@ -153,15 +159,15 @@ body {
 /* Search */
 .search-section {
     text-align: center;
-    padding: 56px 0 36px;
-    max-width: 720px;
+    padding: 60px 0 40px;
+    max-width: 800px;
     margin: 0 auto;
 }
 .search-section h1 {
-    font-size: clamp(28px, 5vw, 42px);
+    font-size: clamp(28px, 5vw, 48px);
     font-weight: var(--fw-display);
     letter-spacing: -0.03em;
-    margin: 0 0 12px;
+    margin: 0 0 14px;
 }
 .search-section h1 em {
     color: var(--blue);
@@ -231,19 +237,35 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Example neighborhood chips */
+/* Example neighborhood chips — horizontally scrolling bar */
 .examples {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
     margin-top: 14px;
+    min-width: 0;
 }
 .examples-label {
     font-size: 13px;
     color: var(--ink-soft);
+    flex-shrink: 0;
 }
+.chip-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 4px 2px;
+    min-width: 0;
+    scrollbar-width: none;              /* Firefox */
+    -webkit-overflow-scrolling: touch;
+    /* Fade the clipped edges so it reads as scrollable */
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+.chip-scroll::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
+.chip { scroll-snap-align: start; flex-shrink: 0; }
 .chip {
     padding: 6px 14px;
     font-size: 13px;
@@ -343,8 +365,10 @@ body {
     visibility: hidden;
     transition: opacity 0.15s, transform 0.15s;
     pointer-events: none;
-    z-index: 50;
+    /* Leaflet panes go up to z-index 800; tooltips must beat the map */
+    z-index: 1100;
 }
+.tip { z-index: 1100; }
 .tip:hover::after, .tip:focus-visible::after, .tip.open::after {
     opacity: 1;
     visibility: visible;
@@ -374,8 +398,10 @@ body {
     grid-column: 1 / -1;
     padding: 0;
     overflow: hidden;
+    /* Extra room below the map so card tooltips never crowd it */
+    margin-bottom: 8px;
 }
-#map { height: 340px; width: 100%; }
+#map { height: 480px; width: 100%; }
 
 .big-stat {
     font-size: 40px;
@@ -521,6 +547,51 @@ body {
 .actions a:hover { border-color: var(--blue); transform: translateY(-1px); }
 .actions a .lucide { width: 15px; height: 15px; flex-shrink: 0; }
 
+/* About page */
+.about-page { padding-bottom: 56px; }
+.about-hero {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 56px 0 40px;
+}
+.about-hero h1 {
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: var(--fw-display);
+    letter-spacing: -0.03em;
+    margin: 0 0 14px;
+    line-height: 1.2;
+}
+.about-hero h1 em { color: var(--blue); font-style: normal; }
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+.about-grid .card p { font-size: 14.5px; margin: 0 0 12px; }
+.about-grid .card p:last-child { margin-bottom: 0; }
+.about-steps {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 14.5px;
+    display: grid;
+    gap: 10px;
+}
+.about-privacy {
+    margin: 0 0 12px;
+    padding-left: 20px;
+    font-size: 14.5px;
+    display: grid;
+    gap: 8px;
+}
+.site-footer a { color: var(--blue); text-decoration: none; font-weight: var(--fw-ui); }
+.site-footer a:hover { text-decoration: underline; }
+@media (max-width: 680px) {
+    .about-grid { grid-template-columns: 1fr; }
+}
+
 /* Footer */
 .site-footer {
     border-top: 1px solid var(--line);
@@ -539,6 +610,9 @@ body {
     .gap-inputs label { flex: 1 1 100%; }
     .search-section { padding: 40px 0 28px; }
     .search-section h1 { font-size: clamp(26px, 7.5vw, 34px); }
+    #map { height: 320px; }
+    .examples { flex-direction: column; gap: 6px; }
+    .chip-scroll { max-width: 100%; }
     /* Tooltips: keep the bubble on screen instead of centering off the edge */
     .tip::after {
         left: auto;

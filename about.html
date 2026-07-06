@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About FloodGap | What it is, how it works, and your privacy</title>
+    <meta name="description" content="FloodGap turns three public government datasets into one clear answer: what would a flood cost your home, and how much of that is on you." />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0b2545" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script>
+        // Apply saved theme before first paint to avoid a flash
+        (function () {
+            var saved = localStorage.getItem("floodgap-theme");
+            var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (dark) document.documentElement.setAttribute("data-theme", "dark");
+        })();
+    </script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap header-row">
+            <a class="brand brand-link" href="index.html">
+                <i data-lucide="waves" class="brand-mark"></i>
+                <span class="brand-name">FloodGap</span>
+            </a>
+            <p class="tagline">Know your flood risk. Know your gap.</p>
+            <div class="header-actions">
+                <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark mode">
+                    <i data-lucide="moon" class="icon-moon"></i>
+                    <i data-lucide="sun" class="icon-sun hidden"></i>
+                </button>
+                <a href="index.html" class="install-btn">
+                    <i data-lucide="search"></i>
+                    Check an address
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap about-page">
+        <section class="about-hero">
+            <h1>One question, answered honestly:<br /><em>what would a flood actually cost you?</em></h1>
+            <p class="sub">
+                FloodGap takes three public government datasets that most families never see
+                and turns them into one clear answer about their own home.
+            </p>
+        </section>
+
+        <section class="about-grid">
+            <div class="card">
+                <h2><i data-lucide="target"></i> Why this exists</h2>
+                <p>
+                    When Hurricane Harvey hit Houston, it flooded around 204,000 homes.
+                    Most of those families had no flood insurance. Not because they gambled
+                    and lost, but because nobody ever told them three things: their home's
+                    real flood risk, that regular homeowners insurance never covers floods,
+                    and what a flood would actually cost them out of pocket.
+                </p>
+                <p>
+                    Every one of those answers already existed in public government data.
+                    It just wasn't in a form a normal person could use. FloodGap fixes that.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="settings"></i> How it works</h2>
+                <ol class="about-steps">
+                    <li><strong>You type an address.</strong> OpenStreetMap's geocoder turns it into map coordinates.</li>
+                    <li><strong>We check FEMA's flood maps.</strong> The National Flood Hazard Layer tells us the official flood zone at that exact point.</li>
+                    <li><strong>We pull the receipts.</strong> OpenFEMA's records show every flood-insurance claim paid in that ZIP code since 1978. Real floods, real dollars.</li>
+                    <li><strong>We do the math.</strong> Using simplified FEMA depth-damage curves, we estimate what a typical flood for that zone would cost, subtract any flood coverage, and show the gap.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="calculator"></i> The math, honestly stated</h2>
+                <p>
+                    Each flood zone maps to a typical water depth for its design flood.
+                    Depth maps to a damage ratio taken from simplified US Army Corps of
+                    Engineers depth-damage curves. Estimated loss is your home value times
+                    that ratio; your gap is whatever insurance doesn't cover.
+                </p>
+                <p>
+                    These are honest estimates, not predictions. A real flood can be kinder
+                    or crueler than the model. The point is scale: seeing a five-figure gap
+                    is what gets a family to price a $600-a-year flood policy.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="shield-check"></i> Your privacy</h2>
+                <p><strong>Nothing you type is saved. Anywhere. Ever.</strong></p>
+                <ul class="about-privacy">
+                    <li>No accounts, no sign-up, no cookies used for tracking.</li>
+                    <li>Addresses you search go directly from your browser to public government and OpenStreetMap services, then the answer comes straight back. FloodGap has no server that sees or stores them.</li>
+                    <li>No analytics, no ad scripts, no third-party trackers.</li>
+                    <li>The only thing stored on your device is your light/dark theme choice.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="database"></i> Data sources</h2>
+                <ul class="about-privacy">
+                    <li>FEMA National Flood Hazard Layer (flood zones)</li>
+                    <li>OpenFEMA NFIP claims dataset (claim counts and payouts)</li>
+                    <li>FEMA / USACE depth-damage guidance (loss ratios)</li>
+                    <li>OpenStreetMap Nominatim (address lookup) and map tiles</li>
+                </ul>
+                <p class="detail">
+                    FloodGap is an educational tool, not insurance, financial, or engineering
+                    advice. Always confirm your official flood zone with FEMA before making
+                    insurance decisions.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="user"></i> Who built this</h2>
+                <p>
+                    Built by Julian Quevedo, a high school student in Houston, TX, for the
+                    2026 Congressional App Challenge. Houston is home; Harvey is the reason
+                    this app exists.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>
+                FloodGap is an educational tool, not insurance or financial advice.
+                Flood zones from FEMA's National Flood Hazard Layer; claims from OpenFEMA;
+                loss estimates use simplified FEMA depth-damage ratios.
+            </p>
+            <p>Built by Julian Quevedo · Houston, TX · <a href="index.html">Check an address</a></p>
+        </div>
+    </footer>
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js").catch(() => {});
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@0.542.0/dist/umd/lucide.min.js"></script>
+    <script>
+        // Standalone page: theme toggle + icons (no app.js needed here)
+        (function () {
+            var btn = document.getElementById("theme-toggle");
+            function icon() {
+                var dark = document.documentElement.getAttribute("data-theme") === "dark";
+                var moon = btn.querySelector(".icon-moon");
+                var sun = btn.querySelector(".icon-sun");
+                if (moon) moon.classList.toggle("hidden", dark);
+                if (sun) sun.classList.toggle("hidden", !dark);
+            }
+            btn.addEventListener("click", function () {
+                var dark = document.documentElement.getAttribute("data-theme") === "dark";
+                if (dark) document.documentElement.removeAttribute("data-theme");
+                else document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("floodgap-theme", dark ? "light" : "dark");
+                icon();
+            });
+            if (window.lucide) lucide.createIcons();
+            icon();
+        })();
+    </script>
+</body>
+</html>

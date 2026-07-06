@@ -37,13 +37,17 @@ python -m http.server 8000
 
 ```
 cd floodgap
-pip install flask anthropic
-$env:ANTHROPIC_API_KEY = "sk-ant-..."   # PowerShell
+pip install flask requests
+$env:GEMINI_API_KEY = "..."   # PowerShell; free key from aistudio.google.com
 python server/app.py
 ```
 
 Either way, open http://localhost:8000. Without an API key everything still
 works — the explain panel uses built-in templates instead of AI.
+
+**Every API used is free:** OpenStreetMap Nominatim (geocoding), FEMA NFHL
+(flood zones), OpenFEMA (claims), and Google Gemini's free tier (optional AI
+explainer — no credit card required for an AI Studio key).
 
 ## Install as an app (PWA)
 
