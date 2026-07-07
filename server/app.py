@@ -2,14 +2,16 @@
 
 Run from the floodgap folder:
     pip install flask requests
-    set GEMINI_API_KEY=...   (PowerShell: $env:GEMINI_API_KEY="...")
+    $env:GROQ_API_KEY = "gsk_..."   # free key from console.groq.com, no card
     python server/app.py
 
 Then open http://localhost:8000
 
-The AI explainer uses Google's Gemini free tier (aistudio.google.com — free
-API key, no card). Without a key the site still works fully; the explain
-panel uses the built-in template explanations instead.
+The AI explainer uses Groq's free tier (console.groq.com — free API key,
+no credit card, generous daily limits, runs open Llama models). A Gemini
+key (GEMINI_API_KEY) also works if set instead. Without any key the site
+still works fully; the explain panel uses the built-in template
+explanations instead.
 """
 
 import os
@@ -25,6 +27,10 @@ except ImportError:
 ROOT = Path(__file__).resolve().parent.parent  # the floodgap/ folder
 
 app = Flask(__name__, static_folder=None)
+
+GROQ_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_URL = (
@@ -64,9 +70,43 @@ def _facts_from(data):
     return facts
 
 
+def _ask_groq(system, user):
+    res = http.post(
+        GROQ_URL,
+        headers={"Authorization": "Bearer " + GROQ_KEY},
+        json={
+            "model": GROQ_MODEL,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "max_tokens": 500,
+            "temperature": 0.6,
+        },
+        timeout=20,
+    )
+    res.raise_for_status()
+    return res.json()["choices"][0]["message"]["content"]
+
+
+def _ask_gemini(system, user):
+    res = http.post(
+        GEMINI_URL,
+        params={"key": GEMINI_KEY},
+        json={
+            "system_instruction": {"parts": [{"text": system}]},
+            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "generationConfig": {"maxOutputTokens": 500, "temperature": 0.6},
+        },
+        timeout=20,
+    )
+    res.raise_for_status()
+    return res.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+
 @app.post("/api/explain")
 def explain():
-    if not GEMINI_KEY or http is None:
+    if http is None or not (GROQ_KEY or GEMINI_KEY):
         return jsonify({"error": "AI backend not configured"}), 503
 
     data = request.get_json(silent=True) or {}
@@ -76,22 +116,10 @@ def explain():
     if not facts:
         return jsonify({"error": "no data"}), 400
 
+    system = SYSTEM_PROMPT.format(lang=lang)
+    user = "\n".join(facts)
     try:
-        res = http.post(
-            GEMINI_URL,
-            params={"key": GEMINI_KEY},
-            json={
-                "system_instruction": {
-                    "parts": [{"text": SYSTEM_PROMPT.format(lang=lang)}]
-                },
-                "contents": [{"role": "user", "parts": [{"text": "\n".join(facts)}]}],
-                "generationConfig": {"maxOutputTokens": 500, "temperature": 0.6},
-            },
-            timeout=20,
-        )
-        res.raise_for_status()
-        body = res.json()
-        text = body["candidates"][0]["content"]["parts"][0]["text"]
+        text = _ask_groq(system, user) if GROQ_KEY else _ask_gemini(system, user)
     except Exception:
         # Any upstream hiccup: let the frontend keep its template explanation
         return jsonify({"error": "AI request failed"}), 502
@@ -112,7 +140,7 @@ def static_files(path):
 
 if __name__ == "__main__":
     print("FloodGap running at http://localhost:8000")
-    if not GEMINI_KEY:
-        print("NOTE: no GEMINI_API_KEY set — AI explain disabled, "
-              "built-in template explanations will be used.")
+    if not (GROQ_KEY or GEMINI_KEY):
+        print("NOTE: no GROQ_API_KEY (or GEMINI_API_KEY) set — AI explain "
+              "disabled, built-in template explanations will be used.")
     app.run(host="127.0.0.1", port=8000, debug=False)
