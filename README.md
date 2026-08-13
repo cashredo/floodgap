@@ -23,6 +23,8 @@ datasets into one answer a family can act on.
 4. **Gap calculator** applies simplified FEMA/USACE depth-damage curves:
    `estimated loss = home value × damage ratio(zone depth)`, `gap = loss − coverage`
 5. **Explain panel** translates the readout into plain English or Spanish
+6. **Risk engine** simulates 10,000 years per zone to produce an expected annual loss, tail
+   risk (VaR/CVaR), and a fair-vs-market premium — see methods.html
 
 ## Run locally
 
@@ -62,6 +64,8 @@ The service worker caches the app shell for instant loads.
 - [x] Stage 1 — web skeleton: search, map, zone, claims, gap calculator, template explainer
 - [x] Stage 2 — AI explainer: Flask backend + Claude API (English/Spanish), graceful fallback
 - [x] Stage 3 — PWA: icons, service worker, install button
+- [x] Stage 4 — Risk engine: Monte Carlo loss distribution, EAL/VaR/CVaR, expected-utility
+  insurance model, depth-damage + claims-by-year charts, and a "The Math" methods page
 - [ ] Deploy (Netlify/Render) + demo video
 
 ## Disclaimer

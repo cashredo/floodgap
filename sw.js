@@ -1,17 +1,24 @@
 // sw.js — service worker: caches the app shell so FloodGap installs and
 // opens instantly like a native app. API calls always go to the network.
 
-const CACHE = "floodgap-v6";
+const CACHE = "floodgap-v7";
 const SHELL = [
     ".",
     "index.html",
     "about.html",
+    "methods.html",
     "css/style.css",
     "js/app.js",
     "js/geocode.js",
     "js/fema.js",
     "js/gapcalc.js",
     "js/map.js",
+    "js/depthdamage.js",
+    "js/hazard.js",
+    "js/loss.js",
+    "js/riskmetrics.js",
+    "js/insurance.js",
+    "js/charts.js",
     "manifest.json",
     "icons/icon-192.png",
     "icons/icon-512.png",
