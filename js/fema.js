@@ -94,4 +94,60 @@ const Fema = {
             text: "Zone could not be determined from FEMA's flood map service for this exact point.",
         };
     },
+
+    // Aggregate raw claim rows into {year,count}[] sorted ascending. Pure.
+    _aggregateByYear(rows) {
+        const byYear = new Map();
+        for (const r of rows || []) {
+            const y = Number(r.yearOfLoss);
+            if (!Number.isFinite(y) || y <= 0) continue;
+            byYear.set(y, (byYear.get(y) || 0) + 1);
+        }
+        return [...byYear.entries()]
+            .map(([year, count]) => ({ year, count }))
+            .sort((a, b) => a.year - b.year);
+    },
+
+    // Claims per year for a ZIP (best-effort; capped fetch like claimsByZip).
+    async claimsByYear(zip) {
+        if (!zip) return [];
+        try {
+            const url =
+                "https://www.fema.gov/api/open/v2/FimaNfipClaims" +
+                "?$filter=reportedZipCode%20eq%20%27" + encodeURIComponent(zip) + "%27" +
+                "&$top=10000&$select=yearOfLoss";
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            return this._aggregateByYear(data?.FimaNfipClaims || []);
+        } catch {
+            return [];
+        }
+    },
+
+    // Average annual NFIP premium for a ZIP. Live OpenFEMA Policies with a
+    // documented benchmark fallback by risk level (see Methods page).
+    async marketPremium(zip, level) {
+        const benchmark = level === "high" ? 1200 : level === "moderate" ? 700 : 500;
+        if (!zip) return benchmark;
+        try {
+            const url =
+                "https://www.fema.gov/api/open/v2/FimaNfipPolicies" +
+                "?$filter=reportedZipCode%20eq%20%27" + encodeURIComponent(zip) + "%27" +
+                "&$top=2000&$select=totalInsurancePremiumOfThePolicy";
+            const res = await fetch(url);
+            if (!res.ok) return benchmark;
+            const data = await res.json();
+            const rows = data?.FimaNfipPolicies || [];
+            const vals = rows
+                .map((r) => Number(r.totalInsurancePremiumOfThePolicy))
+                .filter((v) => Number.isFinite(v) && v > 0);
+            if (vals.length === 0) return benchmark;
+            return Math.round(vals.reduce((s, x) => s + x, 0) / vals.length);
+        } catch {
+            return benchmark;
+        }
+    },
 };
+
+if (typeof module !== "undefined" && module.exports) module.exports = Fema;
