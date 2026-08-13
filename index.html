@@ -155,6 +155,47 @@
                     </div>
                 </div>
 
+                <!-- Risk model -->
+                <div class="card risk-model-card" id="risk-card">
+                    <h2><i data-lucide="activity"></i> Your flood risk, modeled</h2>
+                    <p class="detail">We simulate 10,000 possible years of weather for your zone and read off the risk.</p>
+                    <div class="risk-inputs">
+                        <label>First-floor height above ground (ft)
+                            <input type="number" id="ffe-input" value="1" min="0" max="15" step="0.5" />
+                        </label>
+                        <label>Explore a flood depth: <span id="depth-readout">3.0 ft</span>
+                            <input type="range" id="depth-slider" min="0" max="12" step="0.5" value="3" />
+                        </label>
+                    </div>
+                    <div id="dd-chart" class="chart" aria-label="Depth-damage curve"></div>
+                    <div class="metric-row">
+                        <div class="metric"><span class="metric-label">Expected annual loss</span><span class="metric-val" id="eal-val">—</span></div>
+                        <div class="metric"><span class="metric-label">1-in-100 year loss (VaR)</span><span class="metric-val" id="var-val">—</span></div>
+                        <div class="metric"><span class="metric-label">Catastrophic-year avg (CVaR)</span><span class="metric-val" id="cvar-val">—</span></div>
+                    </div>
+                    <div id="le-chart" class="chart" aria-label="Loss exceedance curve"></div>
+                    <p class="detail">Each point: the chance a year's flood loss exceeds that dollar amount.</p>
+                </div>
+
+                <!-- Insurance decision -->
+                <div class="card insure-card" id="insure-card">
+                    <h2><i data-lucide="scale"></i> Should you insure?</h2>
+                    <div class="metric-row">
+                        <div class="metric"><span class="metric-label">Fair-value premium</span><span class="metric-val" id="fair-prem">—</span></div>
+                        <div class="metric"><span class="metric-label">Typical market premium</span><span class="metric-val" id="market-prem">—</span></div>
+                        <div class="metric"><span class="metric-label">Worth it up to</span><span class="metric-val" id="ce-prem">—</span></div>
+                    </div>
+                    <p class="detail" id="npv-val">—</p>
+                    <p class="detail methods-link"><a href="methods.html">See the math behind these numbers →</a></p>
+                </div>
+
+                <!-- Flood history -->
+                <div class="card history-card" id="history-card">
+                    <h2><i data-lucide="bar-chart-3"></i> Flood claims by year</h2>
+                    <div id="year-chart" class="chart" aria-label="NFIP claims by year"></div>
+                    <p class="detail">NFIP claims paid in this ZIP each year. Harvey (2017) is highlighted.</p>
+                </div>
+
                 <!-- Plain-English explanation -->
                 <div class="card explain-card" id="explain-card">
                     <div class="explain-head">
@@ -209,6 +250,12 @@
     <script src="js/geocode.js"></script>
     <script src="js/fema.js"></script>
     <script src="js/gapcalc.js"></script>
+    <script src="js/depthdamage.js"></script>
+    <script src="js/hazard.js"></script>
+    <script src="js/loss.js"></script>
+    <script src="js/riskmetrics.js"></script>
+    <script src="js/insurance.js"></script>
+    <script src="js/charts.js"></script>
     <script src="js/map.js"></script>
     <script src="js/app.js"></script>
 </body>
