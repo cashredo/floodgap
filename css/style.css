@@ -634,17 +634,17 @@ body {
 .risk-inputs label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; }
 .risk-inputs input[type="range"] { width: 100%; }
 .chart { width: 100%; margin: 0.5rem 0; }
-.chart .axis { stroke: var(--border, #cbd5e1); stroke-width: 1; }
-.chart .dd-line { stroke: var(--accent, #2563eb); stroke-width: 2.5; }
-.chart .dd-bfe { stroke: #ef4444; stroke-dasharray: 4 3; stroke-width: 1.5; }
-.chart .dd-marker { fill: var(--accent, #2563eb); stroke: #fff; stroke-width: 2; }
-.chart .bar { fill: var(--accent, #2563eb); opacity: 0.7; }
-.chart .bar-highlight { fill: #ef4444; opacity: 1; }
-.chart .le-line { stroke: var(--accent, #2563eb); stroke-width: 2; }
-.chart .empty { fill: var(--muted, #64748b); font-size: 12px; }
+.chart .axis { stroke: var(--line); stroke-width: 1; }
+.chart .dd-line { stroke: var(--blue); stroke-width: 2.5; }
+.chart .dd-bfe { stroke: var(--danger); stroke-dasharray: 4 3; stroke-width: 1.5; }
+.chart .dd-marker { fill: var(--blue); stroke: var(--card); stroke-width: 2; }
+.chart .bar { fill: var(--blue); opacity: 0.7; }
+.chart .bar-highlight { fill: var(--danger); opacity: 1; }
+.chart .le-line { stroke: var(--blue); stroke-width: 2; }
+.chart .empty { fill: var(--ink-soft); font-size: 12px; }
 .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
 .metric { display: flex; flex-direction: column; gap: 0.15rem; }
-.metric-label { font-size: 0.72rem; color: var(--muted, #64748b); }
+.metric-label { font-size: 0.72rem; color: var(--ink-soft); }
 .metric-val { font-size: 1.05rem; font-weight: 700; }
 .methods-link { margin-top: 0.5rem; }
 @media (max-width: 640px) { .metric-row { grid-template-columns: 1fr; } }
