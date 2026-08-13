@@ -648,3 +648,13 @@ body {
 .metric-val { font-size: 1.05rem; font-weight: 700; }
 .methods-link { margin-top: 0.5rem; }
 @media (max-width: 640px) { .metric-row { grid-template-columns: 1fr; } }
+
+/* Methods page */
+.methods-page { max-width: 720px; }
+.methods-page h2 { margin-top: 1.5rem; }
+.formula {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    background: var(--blue-soft); color: var(--ink);
+    padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 1.05rem;
+    overflow-x: auto; border: 1px solid var(--line);
+}
