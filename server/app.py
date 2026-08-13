@@ -67,6 +67,13 @@ def _facts_from(data):
         facts.append(f"Flood insurance coverage: ${data.get('coverage', 0):,}")
         facts.append(f"Estimated damage in a typical flood for this zone: ${data.get('estimatedLoss', 0):,}")
         facts.append(f"Uncovered gap: ${data.get('gap', 0):,}")
+    if data.get("expectedAnnualLoss") is not None:
+        facts.append(
+            f"Modeled expected annual loss: ${data['expectedAnnualLoss']:,.0f}; "
+            f"1-in-100-year loss: ${data.get('var99') or 0:,.0f}; "
+            f"fair-value premium: ${data.get('fairPremium') or 0:,.0f}/yr; "
+            f"typical market premium: ${data.get('marketPremium') or 0:,.0f}/yr"
+        )
     return facts
 
 

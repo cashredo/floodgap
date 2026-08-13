@@ -301,6 +301,10 @@ const App = {
                     coverage: s.gap?.coverage ?? null,
                     estimatedLoss: s.gap?.estimatedLoss ?? null,
                     gap: s.gap?.gap ?? null,
+                    expectedAnnualLoss: s.risk?.eal ?? null,
+                    var99: s.risk?.var99 ?? null,
+                    fairPremium: s.risk?.fair ?? null,
+                    marketPremium: s.risk?.market ?? null,
                 }),
             });
             if (!res.ok) return;
@@ -362,6 +366,12 @@ const App = {
                       "</strong> saldría de su bolsillo. El seguro de casa normal <strong>no</strong> cubre inundaciones; se necesita una póliza aparte (NFIP).</p>"
                     : "<p>Con su cobertura actual, una inundación típica estaría <strong>cubierta</strong>. Bien hecho.</p>";
             }
+            if (s.risk) {
+                html += "<p>Simulando 10,000 años posibles, su <strong>pérdida anual esperada</strong> por inundación es de aproximadamente <strong>" +
+                    GapCalc.formatUSD(s.risk.eal) + "</strong>. En un año malo poco frecuente (una inundación de 1 en 100) la pérdida podría llegar a <strong>" +
+                    GapCalc.formatUSD(s.risk.var99) + "</strong>. Una prima justa rondaría los <strong>" +
+                    GapCalc.formatUSD(s.risk.fair) + "/año</strong>.</p>";
+            }
             el.innerHTML = html || "<p>Busque una dirección para ver la explicación.</p>";
             return;
         }
@@ -385,6 +395,12 @@ const App = {
                   GapCalc.formatUSD(gap.estimatedLoss) + "</strong>, and <strong>" + GapCalc.formatUSD(gap.gap) +
                   "</strong> of that would come out of your pocket. Regular homeowners insurance does <strong>not</strong> cover floods; it takes a separate NFIP or private flood policy.</p>"
                 : "<p>With your current coverage, a typical flood for your zone would be <strong>fully covered</strong>. That puts you ahead of most of Houston.</p>";
+        }
+        if (s.risk) {
+            html += "<p>Simulating 10,000 possible years, your <strong>expected annual flood loss</strong> is about <strong>" +
+                GapCalc.formatUSD(s.risk.eal) + "</strong>. In a rare bad year (a 1-in-100 flood) the loss could reach <strong>" +
+                GapCalc.formatUSD(s.risk.var99) + "</strong>. A fair-value flood premium is around <strong>" +
+                GapCalc.formatUSD(s.risk.fair) + "/yr</strong>.</p>";
         }
         el.innerHTML = html || "<p>Search an address to see your explanation.</p>";
     },
