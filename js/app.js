@@ -9,6 +9,8 @@ const App = {
         claims: null,
         gap: null,
         lang: "en",
+        risk: null,
+        losses: null,
     },
 
     init() {
@@ -19,6 +21,8 @@ const App = {
         });
         document.getElementById("calc-btn").addEventListener("click", () => this.calculate());
         document.getElementById("lang-toggle").addEventListener("click", () => this.toggleLang());
+        document.getElementById("depth-slider").addEventListener("input", () => this.renderDepthSlider());
+        document.getElementById("ffe-input").addEventListener("input", () => this.runRiskEngine());
         document.querySelectorAll(".chip").forEach((chip) =>
             chip.addEventListener("click", () => {
                 document.getElementById("address-input").value = chip.dataset.addr;
@@ -149,6 +153,7 @@ const App = {
 
             this.setStatus("");
             this.renderExplain();
+            this.runRiskEngine();
             this.tryAIExplain();
         } catch (err) {
             this.setStatus(err.message, true);
@@ -184,6 +189,59 @@ const App = {
         document.getElementById("claims-desc").textContent = desc;
     },
 
+    async runRiskEngine() {
+        const s = this.state;
+        if (!s.zone) return;
+        const homeValue = Math.max(1000, Number(document.getElementById("home-value").value) || 300000);
+        const ffe = Math.max(0, Number(document.getElementById("ffe-input").value) || 0);
+
+        const losses = Loss.simulate({
+            zone: s.zone, subtype: s.subtype, homeValue, firstFloorElev: ffe,
+            N: 10000, rng: Loss.seededRng(20260812), hazard: Hazard, depthDamage: DepthDamage,
+        });
+        s.losses = losses;
+
+        const eal = RiskMetrics.expectedAnnualLoss(losses);
+        const var99 = RiskMetrics.valueAtRisk(losses, 0.99);
+        const cvar99 = RiskMetrics.conditionalVaR(losses, 0.99);
+        const fair = Insurance.fairPremium(eal);
+        const ce = Insurance.certaintyEquivalentPremium(losses, 1e-5);
+        const market = await Fema.marketPremium(s.address?.zip, s.zoneInfo?.level);
+        const npv = Insurance.thirtyYearNPV({ eal, premium: market });
+        s.risk = { eal, var99, cvar99, fair, ce, market, npv, homeValue, ffe };
+
+        document.getElementById("le-chart").innerHTML = Charts.lossExceedance(losses, RiskMetrics, {});
+        document.getElementById("eal-val").textContent = GapCalc.formatUSD(eal) + "/yr";
+        document.getElementById("var-val").textContent = GapCalc.formatUSD(var99);
+        document.getElementById("cvar-val").textContent = GapCalc.formatUSD(cvar99);
+        document.getElementById("fair-prem").textContent = GapCalc.formatUSD(fair) + "/yr";
+        document.getElementById("market-prem").textContent = GapCalc.formatUSD(market) + "/yr";
+        document.getElementById("ce-prem").textContent = GapCalc.formatUSD(ce) + "/yr";
+        document.getElementById("npv-val").textContent = npv > 0
+            ? "Over 30 years, insuring saves about " + GapCalc.formatUSD(npv) + " in expectation (discounted, with a rising-risk trend)."
+            : "Over 30 years, the market premium slightly exceeds your expected losses (" + GapCalc.formatUSD(-npv) + " net).";
+
+        this.renderDepthSlider();
+        this.renderYearChart();
+    },
+
+    renderDepthSlider() {
+        const s = this.state;
+        if (!s.risk) return;
+        const depth = Number(document.getElementById("depth-slider").value);
+        document.getElementById("depth-readout").textContent = depth.toFixed(1) + " ft";
+        const bfe = Hazard.depthForProbability(s.zone, s.subtype, 0.01); // 100-yr base flood
+        document.getElementById("dd-chart").innerHTML =
+            Charts.depthDamageCurve(DepthDamage, { currentDepth: depth, baseFloodDepth: bfe });
+    },
+
+    async renderYearChart() {
+        const s = this.state;
+        const data = await Fema.claimsByYear(s.address?.zip);
+        document.getElementById("year-chart").innerHTML =
+            Charts.claimsByYearBars(data, { highlightYear: 2017 });
+    },
+
     calculate() {
         if (!this.state.zone) {
             this.setStatus("Search an address first, then calculate your gap.", true);
@@ -199,6 +257,7 @@ const App = {
 
         const result = GapCalc.compute(homeValue, coverage, this.state.zone, this.state.subtype);
         this.state.gap = { ...result, homeValue, coverage };
+        this.runRiskEngine();
 
         const box = document.getElementById("gap-result");
         box.classList.remove("hidden");
