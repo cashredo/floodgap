@@ -775,7 +775,7 @@ git commit -m "feat: inline-SVG chart builders (depth-damage, claims-by-year, ex
 
 **Interfaces:**
 - Consumes: element IDs wired in Task 9.
-- Produces: DOM elements `#risk-card`, `#depth-slider`, `#ffe-input`, `#dd-chart`, `#eal-val`, `#var-val`, `#cvar-val`, `#insure-card`, `#fair-prem`, `#market-prem`, `#ce-prem`, `#npv-val`, `#history-card`, `#year-chart`, and the five new `<script>` tags + `charts.js`.
+- Produces: DOM elements `#risk-card`, `#depth-slider`, `#ffe-input`, `#dd-chart`, `#eal-val`, `#var-val`, `#cvar-val`, `#le-chart`, `#insure-card`, `#fair-prem`, `#market-prem`, `#ce-prem`, `#npv-val`, `#history-card`, `#year-chart`, and the five new `<script>` tags + `charts.js`.
 
 - [ ] **Step 1: Add the script tags.** In `index.html`, replace the line `<script src="js/gapcalc.js"></script>` with:
 
@@ -810,6 +810,8 @@ git commit -m "feat: inline-SVG chart builders (depth-damage, claims-by-year, ex
                         <div class="metric"><span class="metric-label">1-in-100 year loss (VaR)</span><span class="metric-val" id="var-val">—</span></div>
                         <div class="metric"><span class="metric-label">Catastrophic-year avg (CVaR)</span><span class="metric-val" id="cvar-val">—</span></div>
                     </div>
+                    <div id="le-chart" class="chart" aria-label="Loss exceedance curve"></div>
+                    <p class="detail">Each point: the chance a year's flood loss exceeds that dollar amount.</p>
                 </div>
 
                 <!-- Insurance decision -->
@@ -917,6 +919,7 @@ git commit -m "feat: risk-engine UI cards, chart containers, and styles"
         const npv = Insurance.thirtyYearNPV({ eal, premium: market });
         s.risk = { eal, var99, cvar99, fair, ce, market, npv, homeValue, ffe };
 
+        document.getElementById("le-chart").innerHTML = Charts.lossExceedance(losses, RiskMetrics, {});
         document.getElementById("eal-val").textContent = GapCalc.formatUSD(eal) + "/yr";
         document.getElementById("var-val").textContent = GapCalc.formatUSD(var99);
         document.getElementById("cvar-val").textContent = GapCalc.formatUSD(cvar99);
