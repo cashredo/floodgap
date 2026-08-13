@@ -241,7 +241,6 @@ body {
 .examples {
     display: flex;
     gap: 10px;
-    justify-content: center;
     align-items: center;
     margin-top: 14px;
     min-width: 0;
@@ -253,8 +252,10 @@ body {
 }
 .chip-scroll {
     display: flex;
+    flex: 1 1 auto;
     gap: 8px;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
     padding: 4px 2px;
     min-width: 0;
