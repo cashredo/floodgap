@@ -35,7 +35,9 @@ risk (VaR/CVaR), and a decision-theoretic insurance recommendation. The same ris
   #4). The ZIP-claims map heatmap (plan item #6) is already approved and built in the map
   work; an optional loss-exceedance visual may accompany the risk metrics.
 - Extend the EN/ES explainer to narrate the distribution results.
-- Ship a **Methods** page documenting every assumption with citations.
+- Ship a **Methods / "The Math"** page that presents the **actual formulas** used (not just
+  citations), each with a plain-language line explaining what it does and every assumption
+  listed. See Section 5.1.
 
 ## 3. Non-Goals
 
@@ -146,6 +148,27 @@ pure functions (no DOM, no fetch) so the math can be unit-tested against known v
   rationale.
 All assumptions (zone anchor depths, climate trend rate, risk-aversion coefficient,
 discount rate, default first-floor elevation) listed explicitly on the Methods page.
+
+### 5.1 "The Math" page — formulas to display
+
+A dedicated `methods.html` section renders each formula with a one-line plain-language
+gloss. Math is shown as clean static markup (no heavy typesetting dependency — hand-set
+HTML/CSS, or a tiny inline renderer if needed). Formulas:
+
+- **Effective flood depth:** `d_eff = d_flood − FFE` (flood depth above grade minus
+  first-floor elevation).
+- **Damage & loss:** `loss = V · r(d_eff)`, where `r(·)` is the FEMA/USACE depth-damage
+  ratio, linearly interpolated between table points and clamped to `[0, 1]`.
+- **Hazard (stage-frequency) curve:** Gumbel quantile
+  `d(p) = μ − β · ln(−ln(1 − p))`, with `μ, β` fit per zone from anchor return periods.
+- **Monte Carlo estimator:** `EAL ≈ (1/N) · Σ Lᵢ` over `N` simulated years; equivalently
+  the analytic area under the loss-probability curve `EAL = ∫₀¹ L(p) dp`.
+- **Tail risk:** `VaRₐ = Qₐ(L)` (the α-quantile of losses); `CVaRₐ = E[L | L ≥ VaRₐ]`.
+- **Certainty-equivalent premium** (exponential utility, risk-aversion `a`):
+  `π = (1/a) · ln E[e^{a·L}]` — the most a risk-averse homeowner should rationally pay;
+  note `π ≥ EAL`.
+- **30-year NPV of insuring:** `NPV = Σ_{t=1}^{30} (E[Lₜ] − premium) / (1 + r)ᵗ`, with
+  climate trend `E[Lₜ] = EAL · (1 + g)ᵗ` and discount rate `r`.
 
 ## 6. Error Handling & Degradation
 
