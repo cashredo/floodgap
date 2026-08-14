@@ -29,6 +29,17 @@ const App = {
                 this.search();
             })
         );
+        // Desktop mice can't scroll a horizontal bar with a vertical wheel and the
+        // scrollbar is hidden — translate vertical wheel motion into horizontal scroll.
+        const chipScroll = document.querySelector(".chip-scroll");
+        if (chipScroll) {
+            chipScroll.addEventListener("wheel", (e) => {
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    chipScroll.scrollLeft += e.deltaY;
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
         this.setupTheme();
         this.setupInstall();
         this.setupTips();
