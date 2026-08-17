@@ -4,6 +4,13 @@ All notable changes to FloodGap are recorded here. Versions follow
 [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. FloodGap is
 pre-1.0, so the API and features may still change between minor versions.
 
+## [0.1.1] — 2026-08-16
+
+### Added
+- Prominent "Get a flood insurance quote" call-to-action in the insurance card,
+  shown after a result — the clear next step for the user, and the slot a future
+  insurer-referral partnership would occupy.
+
 ## [0.1.0] — 2026-08-16
 
 First public release, live at https://cashredo.github.io/floodgap/

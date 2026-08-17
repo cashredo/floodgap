@@ -648,6 +648,13 @@ body {
 .metric-label { font-size: 0.72rem; color: var(--ink-soft); }
 .metric-val { font-size: 1.05rem; font-weight: 700; }
 .methods-link { margin-top: 0.5rem; }
+.cta-quote {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin: 0.5rem 0 0.25rem; padding: 10px 18px;
+    background: var(--blue); color: #fff;
+    border-radius: var(--radius); font-weight: var(--fw-ui); text-decoration: none;
+}
+.cta-quote:hover { background: #1859ad; }
 @media (max-width: 640px) { .metric-row { grid-template-columns: 1fr; } }
 
 /* Methods page */
