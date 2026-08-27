@@ -656,14 +656,17 @@ body {
     border-radius: var(--radius); font-weight: var(--fw-ui); text-decoration: none;
 }
 .cta-quote:hover { background: #1859ad; }
+.chip-nav { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; gap: 2px; }
 .chip-arrow {
     flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px;
-    background: var(--card); color: var(--blue);
-    border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+    width: 24px; height: 30px; padding: 0;
+    font-family: inherit; font-size: 20px; line-height: 1; font-weight: var(--fw-heading);
+    color: var(--blue); background: transparent; border: none; cursor: pointer;
+    transition: color 0.15s;
 }
-.chip-arrow:hover { border-color: var(--blue); }
+.chip-arrow:hover { color: var(--ink); }
+.chip-arrow:disabled { color: var(--line); cursor: default; }
 .chart-key { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.72rem; color: var(--ink-soft); margin-top: 4px; }
 .key-item { display: inline-flex; align-items: center; gap: 5px; }
 .key-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }

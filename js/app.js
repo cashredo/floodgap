@@ -29,11 +29,22 @@ const App = {
                 this.search();
             })
         );
-        // Left/right arrows scroll the neighborhood bar (works with a plain click).
+        // Left/right arrows drive the neighborhood scroller and disable at each end.
         const chipScroll = document.querySelector(".chip-scroll");
+        const chipLeft = document.getElementById("chip-left");
+        const chipRight = document.getElementById("chip-right");
+        const updateChipArrows = () => {
+            if (!chipScroll) return;
+            const max = chipScroll.scrollWidth - chipScroll.clientWidth;
+            if (chipLeft) chipLeft.disabled = chipScroll.scrollLeft <= 1;
+            if (chipRight) chipRight.disabled = chipScroll.scrollLeft >= max - 1;
+        };
         const scrollChips = (dir) => chipScroll && chipScroll.scrollBy({ left: dir * 220, behavior: "smooth" });
-        document.getElementById("chip-left")?.addEventListener("click", () => scrollChips(-1));
-        document.getElementById("chip-right")?.addEventListener("click", () => scrollChips(1));
+        chipLeft?.addEventListener("click", () => scrollChips(-1));
+        chipRight?.addEventListener("click", () => scrollChips(1));
+        chipScroll?.addEventListener("scroll", updateChipArrows);
+        window.addEventListener("resize", updateChipArrows);
+        updateChipArrows();
         this.setupTheme();
         this.setupInstall();
         this.setupTips();
