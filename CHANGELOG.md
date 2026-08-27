@@ -4,6 +4,14 @@ All notable changes to FloodGap are recorded here. Versions follow
 [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. FloodGap is
 pre-1.0, so the API and features may still change between minor versions.
 
+## [0.1.4] — 2026-08-17
+
+### Added
+- Geocoding fallback: Photon backs up Nominatim so a rate-limit or outage
+  can't take address lookup offline (important before a public launch).
+- Not-advice disclaimer under "What to do next"; "The math" link in the About
+  page footer.
+
 ## [0.1.3] — 2026-08-17
 
 ### Changed

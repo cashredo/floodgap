@@ -667,6 +667,7 @@ body {
 }
 .chip-arrow:hover { color: var(--ink); }
 .chip-arrow:disabled { color: var(--line); cursor: default; }
+.actions-note { margin-top: 12px; font-size: 0.72rem; color: var(--ink-soft); }
 .chart-key { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.72rem; color: var(--ink-soft); margin-top: 4px; }
 .key-item { display: inline-flex; align-items: center; gap: 5px; }
 .key-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
