@@ -614,6 +614,7 @@ body {
     #map { height: 320px; }
     .examples { flex-direction: column; gap: 6px; }
     .chip-scroll { max-width: 100%; }
+    .chip-arrow { display: none; }
     /* Tooltips: keep the bubble on screen instead of centering off the edge */
     .tip::after {
         left: auto;
@@ -655,6 +656,22 @@ body {
     border-radius: var(--radius); font-weight: var(--fw-ui); text-decoration: none;
 }
 .cta-quote:hover { background: #1859ad; }
+.chip-arrow {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--card); color: var(--blue);
+    border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+}
+.chip-arrow:hover { border-color: var(--blue); }
+.chart-key { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.72rem; color: var(--ink-soft); margin-top: 4px; }
+.key-item { display: inline-flex; align-items: center; gap: 5px; }
+.key-swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.swatch-line { background: var(--blue); }
+.swatch-bfe { height: 0; border-top: 2px dashed var(--danger); }
+.swatch-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.swatch-bar { height: 9px; background: var(--blue); opacity: 0.7; }
+.swatch-harvey { height: 9px; background: var(--danger); }
 @media (max-width: 640px) { .metric-row { grid-template-columns: 1fr; } }
 
 /* Methods page */

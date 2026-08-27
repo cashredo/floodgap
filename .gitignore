@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .env
+
+# Business/marketing source docs — kept local, not published to the public repo
+docs/business/

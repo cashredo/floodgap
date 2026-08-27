@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FloodGap | Know your flood risk, know your gap</title>
     <meta name="description" content="Enter any Houston-area address to see your FEMA flood zone, local flood claim history, and the gap between flood damage costs and your insurance coverage." />
-    <meta property="og:title" content="FloodGap — Know your flood risk, know your gap" />
+    <meta property="og:title" content="FloodGap | Know your flood risk, know your gap" />
     <meta property="og:description" content="Enter any Houston-area address to see your FEMA flood zone, real local flood-claim history, and the dollar gap between flood damage and your insurance." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cashredo.github.io/floodgap/" />
     <meta property="og:image" content="https://cashredo.github.io/floodgap/icons/icon-512.png" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="FloodGap — Know your flood risk, know your gap" />
+    <meta name="twitter:title" content="FloodGap | Know your flood risk, know your gap" />
     <meta name="twitter:description" content="See your FEMA flood zone, local claim history, and insurance gap for any Houston address." />
     <meta name="twitter:image" content="https://cashredo.github.io/floodgap/icons/icon-512.png" />
     <link rel="manifest" href="manifest.json" />
@@ -38,7 +38,7 @@
                 <i data-lucide="waves" class="brand-mark"></i>
                 <span class="brand-name">FloodGap</span>
             </a>
-            <p class="tagline">Know your flood risk. Know your gap.</p>
+            <p class="tagline">A simple tool used to find the cost of a flood near your home.</p>
             <div class="header-actions">
                 <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch between light and dark mode">
                     <i data-lucide="moon" class="icon-moon"></i>
@@ -74,6 +74,7 @@
             <p id="search-status" class="status" role="status"></p>
             <div class="examples">
                 <span class="examples-label">Try a neighborhood:</span>
+                <button class="chip-arrow" id="chip-left" type="button" aria-label="Scroll neighborhoods left"><i data-lucide="chevron-left"></i></button>
                 <div class="chip-scroll" role="list" aria-label="Example Houston neighborhoods">
                     <button class="chip" type="button" data-addr="901 Bagby St, Houston, TX 77002">Downtown</button>
                     <button class="chip" type="button" data-addr="5100 Braesheather Dr, Houston, TX 77096">Meyerland</button>
@@ -88,6 +89,7 @@
                     <button class="chip" type="button" data-addr="2700 Town Center Blvd N, Sugar Land, TX 77479">Sugar Land</button>
                     <button class="chip" type="button" data-addr="23501 Cinco Ranch Blvd, Katy, TX 77494">Katy</button>
                 </div>
+                <button class="chip-arrow" id="chip-right" type="button" aria-label="Scroll neighborhoods right"><i data-lucide="chevron-right"></i></button>
             </div>
             <details class="how">
                 <summary>How does this work?</summary>
@@ -177,6 +179,11 @@
                         </label>
                     </div>
                     <div id="dd-chart" class="chart" aria-label="Depth-damage curve"></div>
+                    <div class="chart-key">
+                        <span class="key-item"><span class="key-swatch swatch-line"></span> Damage curve</span>
+                        <span class="key-item"><span class="key-swatch swatch-bfe"></span> 100 year base flood</span>
+                        <span class="key-item"><span class="key-swatch swatch-dot"></span> Your depth</span>
+                    </div>
                     <div class="metric-row">
                         <div class="metric"><span class="metric-label">Expected annual loss</span><span class="metric-val" id="eal-val">—</span></div>
                         <div class="metric"><span class="metric-label">1-in-100 year loss (VaR)</span><span class="metric-val" id="var-val">—</span></div>
@@ -203,6 +210,10 @@
                 <div class="card history-card" id="history-card">
                     <h2><i data-lucide="bar-chart-3"></i> Flood claims by year</h2>
                     <div id="year-chart" class="chart" aria-label="NFIP claims by year"></div>
+                    <div class="chart-key">
+                        <span class="key-item"><span class="key-swatch swatch-bar"></span> Claims</span>
+                        <span class="key-item"><span class="key-swatch swatch-harvey"></span> Harvey 2017</span>
+                    </div>
                     <p class="detail">NFIP claims paid in this ZIP each year. Harvey (2017) is highlighted.</p>
                 </div>
 
@@ -245,7 +256,7 @@
                 Flood zones from FEMA's National Flood Hazard Layer; claims from OpenFEMA;
                 loss estimates use simplified FEMA depth-damage ratios.
             </p>
-            <p>Built by Julian Quevedo · Houston, TX · <a href="about.html">About &amp; privacy</a> · <a href="methods.html">The math</a> · <a href="https://github.com/cashredo/floodgap/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v0.1.1</a></p>
+            <p>Built by Julian Quevedo · Houston, TX · <a href="about.html">About &amp; privacy</a> · <a href="methods.html">The math</a> · <a href="https://github.com/cashredo/floodgap/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v0.1.2</a></p>
         </div>
     </footer>
 

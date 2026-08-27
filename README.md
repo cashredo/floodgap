@@ -1,6 +1,6 @@
 # FloodGap
 
-**Know your flood risk. Know your gap.**
+**A simple tool used to find the cost of a flood near your home.**
 
 Enter any Houston-area address → see your FEMA flood zone, your neighborhood's real
 flood-claim history, and the gap between what a flood would cost and what your

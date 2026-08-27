@@ -29,17 +29,11 @@ const App = {
                 this.search();
             })
         );
-        // Desktop mice can't scroll a horizontal bar with a vertical wheel and the
-        // scrollbar is hidden — translate vertical wheel motion into horizontal scroll.
+        // Left/right arrows scroll the neighborhood bar (works with a plain click).
         const chipScroll = document.querySelector(".chip-scroll");
-        if (chipScroll) {
-            chipScroll.addEventListener("wheel", (e) => {
-                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                    chipScroll.scrollLeft += e.deltaY;
-                    e.preventDefault();
-                }
-            }, { passive: false });
-        }
+        const scrollChips = (dir) => chipScroll && chipScroll.scrollBy({ left: dir * 220, behavior: "smooth" });
+        document.getElementById("chip-left")?.addEventListener("click", () => scrollChips(-1));
+        document.getElementById("chip-right")?.addEventListener("click", () => scrollChips(1));
         this.setupTheme();
         this.setupInstall();
         this.setupTips();

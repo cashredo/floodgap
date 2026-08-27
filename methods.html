@@ -39,27 +39,27 @@
         <h2>3. Hazard: the stage-frequency curve</h2>
         <p class="formula">d(p) = &mu; &minus; &beta; &middot; ln(&minus;ln(1 &minus; p))</p>
         <p>A Gumbel (extreme-value) curve gives flood depth as a function of annual
-        exceedance probability p. &mu; and &beta; are fit per FEMA zone from anchor return periods &mdash;
-        e.g. Zone AE: the 10-year (p = 0.10) flood &asymp; 1 ft and the 100-year base flood
+        exceedance probability p. &mu; and &beta; are fit per FEMA zone from anchor return
+        periods. For example, Zone AE: the 10-year (p = 0.10) flood &asymp; 1 ft and the 100-year base flood
         (p = 0.01) &asymp; 4 ft.</p>
 
         <h2>4. Monte Carlo expected annual loss</h2>
         <p class="formula">EAL &asymp; (1/N) &middot; &Sigma; L<sub>i</sub>&nbsp;&nbsp;=&nbsp;&nbsp;&int;<sub>0</sub><sup>1</sup> L(p) dp</p>
         <p>We simulate N = 10,000 synthetic years. Each year we draw a random flood depth
-        from the hazard curve, convert it to a loss, and average &mdash; the mean of that
+        from the hazard curve, convert it to a loss, and average. The mean of that
         distribution is the Expected Annual Loss.</p>
 
         <h2>5. Tail risk</h2>
         <p class="formula">VaR<sub>&alpha;</sub> = Q<sub>&alpha;</sub>(L)&nbsp;&nbsp;&middot;&nbsp;&nbsp;CVaR<sub>&alpha;</sub> = E[L | L &ge; VaR<sub>&alpha;</sub>]</p>
         <p>Value-at-Risk at &alpha; = 0.99 is the 1-in-100-year loss. Conditional VaR is the
-        average loss in years worse than that &mdash; the catastrophe tail. These are the same
+        average loss in years worse than that, the catastrophe tail. These are the same
         risk measures used in finance.</p>
 
         <h2>6. Fair vs. worth-it premium</h2>
         <p class="formula">&pi; = (1/a) &middot; ln E[e<sup>a&middot;L</sup>]</p>
         <p>The fair premium equals the EAL. Under exponential (risk-averse) utility with
         coefficient a = 1&times;10<sup>&minus;5</sup>, the certainty-equivalent premium &pi; is the most a homeowner
-        should rationally pay &mdash; always at least the EAL, which is why buying insurance can be
+        should rationally pay, and always at least the EAL, which is why buying insurance can be
         rational even when the premium exceeds the average loss.</p>
 
         <h2>7. 30-year value of insuring</h2>
@@ -69,9 +69,9 @@
 
         <h2>Sources</h2>
         <ul>
-            <li>FEMA National Flood Hazard Layer &mdash; flood zones</li>
-            <li>OpenFEMA NFIP Claims &amp; Policies &mdash; claim history and premiums</li>
-            <li>FEMA/USACE depth-damage functions &mdash; damage ratios</li>
+            <li>FEMA National Flood Hazard Layer (flood zones)</li>
+            <li>OpenFEMA NFIP Claims &amp; Policies (claim history and premiums)</li>
+            <li>FEMA/USACE depth-damage functions (damage ratios)</li>
             <li>Extreme-value / flood-frequency methods (USGS Bulletin 17C context)</li>
         </ul>
         <p><a href="index.html">&larr; Back to FloodGap</a></p>

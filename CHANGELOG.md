@@ -4,6 +4,19 @@ All notable changes to FloodGap are recorded here. Versions follow
 [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. FloodGap is
 pre-1.0, so the API and features may still change between minor versions.
 
+## [0.1.2] — 2026-08-16
+
+### Changed
+- Neighborhood picker now uses left/right arrow buttons instead of a hidden
+  scrollbar, so it works with a plain click on desktop.
+- New tagline: "A simple tool used to find the cost of a flood near your home."
+- Cleaned copy on the About and methods pages (removed em-dashes); reworked the
+  privacy line and the "Who built this" note.
+
+### Added
+- Color keys under the risk-model and flood-history charts to identify each
+  series and marker.
+
 ## [0.1.1] — 2026-08-16
 
 ### Added
