@@ -4,6 +4,12 @@ All notable changes to FloodGap are recorded here. Versions follow
 [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. FloodGap is
 pre-1.0, so the API and features may still change between minor versions.
 
+## [0.1.6] — 2026-08-17
+
+### Changed
+- About page: removed remaining hyphens from the copy; added a contact email in
+  "Who built this"; consolidated the build credit into the README.
+
 ## [0.1.5] — 2026-08-17
 
 ### Fixed

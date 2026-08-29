@@ -72,3 +72,9 @@ The service worker caches the app shell for instant loads.
 
 Educational tool, not insurance or financial advice. Zone data from FEMA's NFHL;
 claims from OpenFEMA; loss estimates use simplified depth-damage ratios.
+
+## Acknowledgements
+
+FloodGap was conceived, designed, and directed by Julian Quevedo. The risk-modeling
+pipeline and web app were implemented and tested with the assistance of Anthropic's
+Claude (via Claude Code), working under the author's direction.
