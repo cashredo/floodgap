@@ -27,3 +27,9 @@ test("NPV favors insuring when expected loss exceeds premium", () => {
   const npv = Insurance.thirtyYearNPV({ eal: 2000, premium: 1000, discountRate: 0, climateTrend: 0, years: 1 });
   assert.equal(npv, 1000);
 });
+
+test("certainty-equivalent premium stays finite for absurdly large losses", () => {
+  const big = [0, 500000000]; // a $500M loss should not overflow to Infinity
+  const ce = Insurance.certaintyEquivalentPremium(big, 1e-5);
+  assert.ok(Number.isFinite(ce) && ce > 250000000);
+});

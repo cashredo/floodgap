@@ -4,6 +4,13 @@ All notable changes to FloodGap are recorded here. Versions follow
 [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. FloodGap is
 pre-1.0, so the API and features may still change between minor versions.
 
+## [0.1.5] — 2026-08-17
+
+### Fixed
+- Certainty-equivalent premium could overflow to "Infinity" at extreme home
+  values; now computed with a numerically stable (log-sum-exp) method, and the
+  home-value input is capped at $100M.
+
 ## [0.1.4] — 2026-08-17
 
 ### Added
